@@ -9,4 +9,5 @@ while True:
     if msg == "exit" or msg is None or msg == "":
         break
 
+print("Goodbye")
 my_socket.close()
