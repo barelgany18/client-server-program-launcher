@@ -1,27 +1,52 @@
 import socket
+from typing import Optional
 
-my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-my_socket.connect(("127.0.0.1", 8820))
 
-print("p \t Run program")
-print("c \t Press coordinates")
-print("q \t Quit")
-choice = input("Please enter your choice: ")
-while choice != 'q':
-    if choice == 'p':
-        program_name = input("Enter program name: ")
-        msg = "p" + "-" + program_name
-        my_socket.send(msg.encode())
-    elif choice == 'c':
-        x_coordinates = input("Enter X coordinates: ")
-        y_coordinates = input("Enter Y coordinates: ")
-        msg = "c" + "-" + x_coordinates + "-" + y_coordinates
-        my_socket.send(msg.encode())
+class Client:
+    _connection: socket.socket
 
-    print("p \t Run program")
-    print("c \t Press coordinates")
-    print("q \t Quit")
-    choice = input("Please enter your choice: ")
+    def __init__(self):
+        self._connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-print("Goodbye")
-my_socket.close()
+    def connect(self, server_ip: str, server_port: int) -> None:
+        self._connection.connect((server_ip, server_port))
+
+    def click(self) -> None:
+        x = int(input('Enter x coord:'))
+        y = int(input('Enter y coord:'))
+        self._connection.send(f'c-{x}-{y}'.encode())
+
+    def run_command(self) -> None:
+        command = input('Enter command: ')
+        self._connection.send(f'p-{command}'.encode())
+
+    def send_file(self) -> None:
+        target_file_path = input('Enter target file path: ')
+        source_file_path = input('Enter source file path: ')
+
+        # TODO: send the file content to the server and put it in the target path
+        # Consider using base64
+
+
+def main() -> None:
+    client = Client()
+    client.connect('127.0.0.1', 8820)
+
+    command_mapping = {
+        'c': client.click,
+        'p': client.run_command,
+        'f': client.send_file
+    }
+
+    action = ''
+    while action != 'q':
+        available_actions = ', '.join(command_mapping.keys())
+        action = input(f'Enter action to perform ({available_actions}): ')
+        if action in command_mapping.keys():
+            command_mapping[action]()
+        elif action != 'q':
+            print(f'{action} is an invalid action')
+
+
+if __name__ == '__main__':
+    main()
