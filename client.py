@@ -24,8 +24,10 @@ class Client:
         target_file_path = input('Enter target file path: ')
         source_file_path = input('Enter source file path: ')
 
-        # TODO: send the file content to the server and put it in the target path
-        # Consider using base64
+        file = open(source_file_path)
+        self._connection.send(f"f-{file.read()}-{target_file_path}".encode())
+        file.close()
+
 
 
 def main() -> None:
